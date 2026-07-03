@@ -1,0 +1,1134 @@
+[
+    {
+        "id": "ebf802684285ae98",
+        "type": "tab",
+        "label": "Create character",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ffcf7bb007597058",
+        "type": "tab",
+        "label": "Player Info",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "127d062e39f4e574",
+        "type": "tab",
+        "label": "Inventory",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "837289715e1acf89",
+        "type": "tab",
+        "label": "Dice",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "894856d6a3740fb7",
+        "type": "tab",
+        "label": "Battle",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "406d575ff45f448f",
+        "type": "serverconfig",
+        "host": "minecraft",
+        "rconPort": 25575,
+        "rconPassword": "teinf"
+    },
+    {
+        "id": "efe6662e8ca0273c",
+        "type": "discord-token",
+        "name": "bot"
+    },
+    {
+        "id": "c1a804502827f03d",
+        "type": "debug",
+        "z": "ebf802684285ae98",
+        "name": "ïAmImportant",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 280,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "6e61dc999f6412bc",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Ask For Input",
+        "func": "flow.set(\"waiting_for_name\", true);\n\nmsg.payload = {\n    channel: \"YOUR_CHANNEL_ID\",\n    content: \"Please type your name:\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 680,
+        "wires": [
+            [
+                "10f3e48c93831bc2"
+            ]
+        ]
+    },
+    {
+        "id": "10f3e48c93831bc2",
+        "type": "discordMessageManager",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Send Discord Message",
+        "channel": "1503707981697650838",
+        "token": "efe6662e8ca0273c",
+        "x": 650,
+        "y": 680,
+        "wires": [
+            [
+                "45999a5f54aac66e"
+            ]
+        ]
+    },
+    {
+        "id": "29d9eb2ee269ca0b",
+        "type": "discordMessage",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Discord Message Receive",
+        "channelIdFilter": "1503707981697650838",
+        "token": "efe6662e8ca0273c",
+        "x": 180,
+        "y": 780,
+        "wires": [
+            [
+                "58b9b56f7cf987af",
+                "e087c2ce1b66c25f"
+            ]
+        ]
+    },
+    {
+        "id": "58b9b56f7cf987af",
+        "type": "debug",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Incoming Messages",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 430,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "e087c2ce1b66c25f",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Handle Reply",
+        "func": "const userInput = msg.payload;\n\nflow.set(\"nameOfChara\", userInput);\n\nlet done = false;\n\nif (userInput != \"create\" && !done) {\n    flow.set(\"waiting_for_name\", false);\n}\nif (!flow.get(\"waiting_for_name\")) {\n    flow.set(\"waiting_for_name\", true)\n    msg.payload = {\n        channel: msg.payload.channelId,\n        content: `Welcome ${userInput}!`\n    };\n    let character = {\n        \"name\": userInput\n    };\n\n    let list = global.get(\"character\" || []);\n\n    list.push({\n        name: userInput,\n        lp: 10,\n        owner: msg.payload.authorId,\n        items: []\n    });\n\n    global.set(\"character\", list);\n    done = true;\n\n    return msg;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 780,
+        "wires": [
+            [
+                "b180cc11b7597d4e"
+            ]
+        ]
+    },
+    {
+        "id": "b180cc11b7597d4e",
+        "type": "discordMessageManager",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Reply To User",
+        "channel": "1503707981697650838",
+        "token": "efe6662e8ca0273c",
+        "x": 630,
+        "y": 780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "44ab317ab06fd1dc",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "name": "/create",
+        "func": "if(msg.payload.indexOf(\"/create\") == 0) {\n    msg.case = 0;\n    msg.payload = {\n        contetnt: msg.payload.split(\"/create\")[1],\n        userID: msg.payload.authorId\n    }\n    \nreturn msg;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 120,
+        "wires": [
+            [
+                "eb22f8a9794dfe7e"
+            ]
+        ]
+    },
+    {
+        "id": "a825b6c3f7e8f177",
+        "type": "inject",
+        "z": "ebf802684285ae98",
+        "name": "Reset List",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 60,
+        "wires": [
+            [
+                "d3b83c1a0b5416e4"
+            ]
+        ]
+    },
+    {
+        "id": "d3b83c1a0b5416e4",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "name": "set List",
+        "func": "global.set(\"character\", []);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ee9d8231e8c5501c",
+        "type": "discordInteractionManager",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "",
+        "token": "efe6662e8ca0273c",
+        "x": 670,
+        "y": 1380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "04c72d6fd6b8d2ee",
+        "type": "switch",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "slay",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 300,
+        "y": 1380,
+        "wires": [
+            [
+                "btn_msg",
+                "68cbe3097fa49262"
+            ]
+        ]
+    },
+    {
+        "id": "7f547fd165704f42",
+        "type": "discordMessage",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "",
+        "channelIdFilter": "1488497256507379813",
+        "token": "efe6662e8ca0273c",
+        "x": 130,
+        "y": 1380,
+        "wires": [
+            [
+                "04c72d6fd6b8d2ee"
+            ]
+        ]
+    },
+    {
+        "id": "68cbe3097fa49262",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "function 6",
+        "func": "const data = msg.payload?.data;\n\nif (data?.custom_id === \"open_modal\") {\n\n    msg.payload = {\n        type: \"modal\",\n        title: \"User Form\",\n        custom_id: \"user_form\",\n        components: [\n            {\n                type: 1, // Action Row\n                components: [\n                    {\n                        type: 4, // TEXT INPUT\n                        custom_id: \"username\",\n                        label: \"Enter your name\",\n                        style: 1,\n                        required: true\n                    }\n                ]\n            }\n        ]\n    };\n\n    return msg;\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 1380,
+        "wires": [
+            [
+                "ee9d8231e8c5501c"
+            ]
+        ]
+    },
+    {
+        "id": "btn_msg",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Create Button",
+        "func": "msg.payload = {\n    content: \"Click to open form\",\n    components: [\n        {\n            type: 1,\n            components: [\n                {\n                    type: 2,\n                    label: \"Open Form\",\n                    style: 1,\n                    custom_id: \"open_modal\"\n                }\n            ]\n        }\n    ]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1580,
+        "wires": [
+            [
+                "44ce24d790e95ed8"
+            ]
+        ]
+    },
+    {
+        "id": "interaction_in",
+        "type": "discordInteraction",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Interaction In",
+        "token": "efe6662e8ca0273c",
+        "interactionType": "button",
+        "custom_id": "1883",
+        "interactionObject": true,
+        "ephemeral": false,
+        "responseType": "update",
+        "commandResponseType": "defersReply",
+        "x": 380,
+        "y": 1660,
+        "wires": [
+            [
+                "interaction_logic",
+                "23c32b81e1012f63"
+            ]
+        ]
+    },
+    {
+        "id": "interaction_logic",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Handle Interaction",
+        "func": "const data = msg.payload?.data;\nif (!data) return null;\n\nconst userId =\n    msg.payload?.member?.user?.id ||\n    msg.payload?.user?.id;\n\n// 🔘 BUTTON CLICK → OPEN MODAL\nif (data.custom_id === \"open_modal\") {\n\n    msg.payload = {\n        type: \"modal\",\n        title: \"User Form\",\n        custom_id: \"user_form\",\n        components: [\n            {\n                type: 1,\n                components: [\n                    {\n                        type: 4,\n                        custom_id: \"username\",\n                        label: \"Enter your name\",\n                        style: 1,\n                        required: true\n                    }\n                ]\n            }\n        ]\n    };\n\n    return msg;\n}\n\n// 📝 MODAL SUBMIT → READ INPUT\nif (data.custom_id === \"user_form\") {\n\n    const name =\n        data.components?.[0]?.components?.[0]?.value;\n\n    msg.payload = {\n        type: \"reply\",\n        content: `Hello ${name || \"unknown\"} 👋`\n    };\n\n    return msg;\n}\n\n// ❌ ignore everything else\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 1660,
+        "wires": [
+            [
+                "interaction_mgr",
+                "dc703cee97567b8c"
+            ]
+        ]
+    },
+    {
+        "id": "interaction_mgr",
+        "type": "discordInteractionManager",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Interaction Manager",
+        "token": "efe6662e8ca0273c",
+        "x": 830,
+        "y": 1660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "23c32b81e1012f63",
+        "type": "debug",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 1760,
+        "wires": []
+    },
+    {
+        "id": "dc703cee97567b8c",
+        "type": "debug",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 1740,
+        "wires": []
+    },
+    {
+        "id": "89b2295e683763ed",
+        "type": "debug",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 1500,
+        "wires": []
+    },
+    {
+        "id": "09a0679adc4a6f12",
+        "type": "discordInteractionManager",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "Interaction Manager",
+        "token": "efe6662e8ca0273c",
+        "x": 990,
+        "y": 1580,
+        "wires": [
+            [
+                "89b2295e683763ed"
+            ]
+        ]
+    },
+    {
+        "id": "44ce24d790e95ed8",
+        "type": "discordMessageManager",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "",
+        "channel": "1488497256507379813",
+        "token": "efe6662e8ca0273c",
+        "x": 740,
+        "y": 1580,
+        "wires": [
+            [
+                "09a0679adc4a6f12"
+            ]
+        ]
+    },
+    {
+        "id": "45999a5f54aac66e",
+        "type": "debug",
+        "z": "ebf802684285ae98",
+        "d": true,
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "eb22f8a9794dfe7e",
+        "type": "function",
+        "z": "ebf802684285ae98",
+        "name": "Save character",
+        "func": "const userInput = msg.payload.contetnt;\n\n    msg.payload = {\n        content: `Welcome ${userInput}!`\n    };\n    let character = {\n        \"name\": userInput\n    };\n\n    let list = global.get(\"character\" || []);\n\n    list.push({\n        name: userInput,\n        lp: 10,\n        owner: msg.payload.userID,\n        items: []\n    });\n\n    global.set(\"character\", list);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 120,
+        "wires": [
+            [
+                "2d20bc45e651d523"
+            ]
+        ]
+    },
+    {
+        "id": "2d20bc45e651d523",
+        "type": "discordMessageManager",
+        "z": "ebf802684285ae98",
+        "name": "Send Discord Message",
+        "channel": "1503707981697650838",
+        "token": "efe6662e8ca0273c",
+        "x": 810,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bc09991f2960c0d3",
+        "type": "discordMessage",
+        "z": "ebf802684285ae98",
+        "name": "",
+        "channelIdFilter": "1503707981697650838",
+        "token": "efe6662e8ca0273c",
+        "x": 100,
+        "y": 120,
+        "wires": [
+            [
+                "c1a804502827f03d",
+                "44ab317ab06fd1dc"
+            ]
+        ]
+    },
+    {
+        "id": "38b79cc845f78adb",
+        "type": "switch",
+        "z": "ffcf7bb007597058",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "health",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 490,
+        "y": 60,
+        "wires": [
+            [
+                "022930dbb4b51f75"
+            ]
+        ]
+    },
+    {
+        "id": "cfe37a153f37b39f",
+        "type": "discordMessage",
+        "z": "ffcf7bb007597058",
+        "name": "",
+        "channelIdFilter": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 100,
+        "y": 60,
+        "wires": [
+            [
+                "ccb8456f9cc5b6cf"
+            ]
+        ]
+    },
+    {
+        "id": "ccb8456f9cc5b6cf",
+        "type": "function",
+        "z": "ffcf7bb007597058",
+        "name": "function 3",
+        "func": "if(msg.payload.indexOf(\"p!\") == 0) {\n    msg.case = 0;\n    msg.payload = msg.payload.split(\"p!\")[1];\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 60,
+        "wires": [
+            [
+                "38b79cc845f78adb"
+            ]
+        ]
+    },
+    {
+        "id": "022930dbb4b51f75",
+        "type": "function",
+        "z": "ffcf7bb007597058",
+        "name": "Ask For Input",
+        "func": "if (msg.payload.indexOf(\"health\") == 0) {\n    msg.case = 0;\n    msg.payload = msg.payload.split(\"health\")[1];\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 100,
+        "wires": [
+            [
+                "c79827c10b74725d"
+            ]
+        ]
+    },
+    {
+        "id": "d50153f0d42510b8",
+        "type": "discordMessageManager",
+        "z": "ffcf7bb007597058",
+        "name": "Send Discord Message",
+        "channel": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 930,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c79827c10b74725d",
+        "type": "function",
+        "z": "ffcf7bb007597058",
+        "name": "function 4",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9b26eecc6de9ac18",
+        "type": "function",
+        "z": "127d062e39f4e574",
+        "name": "/inventory",
+        "func": "if(msg.payload.indexOf(\"/inventory\") == 0) {\n    msg.case = 0;\n    msg.payload = {\n        contetnt: msg.payload.split(\"/inventory \")[1]\n    }\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "8974e2088c2283b6"
+            ]
+        ]
+    },
+    {
+        "id": "f53f0984ad47ce7b",
+        "type": "discordMessage",
+        "z": "127d062e39f4e574",
+        "name": "",
+        "channelIdFilter": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "9b26eecc6de9ac18"
+            ]
+        ]
+    },
+    {
+        "id": "085df5e7f62e83a5",
+        "type": "discordCommandManager",
+        "z": "127d062e39f4e574",
+        "name": "",
+        "guild": "1503707981697650838",
+        "token": "efe6662e8ca0273c",
+        "x": 660,
+        "y": 720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7b6bc1dceb08abda",
+        "type": "inject",
+        "z": "127d062e39f4e574",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 720,
+        "wires": [
+            [
+                "e35db9a5df5b60ce"
+            ]
+        ]
+    },
+    {
+        "id": "e35db9a5df5b60ce",
+        "type": "function",
+        "z": "127d062e39f4e574",
+        "name": "define command test",
+        "func": "msg.action = \"set\";\n\n\nmsg.commands = {\n  \"name\": \"blep\",\n  \"type\": 1,\n  \"description\": \"Send a random adorable animal photo\",\n  \"options\": [\n    {\n      \"name\": \"animal\",\n      \"description\": \"The type of animal\",\n      \"type\": 3,\n      \"required\": true,\n      \"choices\": [\n        {\n          \"name\": \"Dog\",\n          \"value\": \"animal_dog\"\n        },\n        {\n          \"name\": \"Cat\",\n          \"value\": \"animal_cat\"\n        },\n        {\n          \"name\": \"Penguin\",\n          \"value\": \"animal_penguin\"\n        }\n      ]\n    },\n    {\n      \"name\": \"only_smol\",\n      \"description\": \"Whether to show only baby animals\",\n      \"type\": 5,\n      \"required\": false\n    }\n  ]\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 720,
+        "wires": [
+            [
+                "085df5e7f62e83a5"
+            ]
+        ]
+    },
+    {
+        "id": "8974e2088c2283b6",
+        "type": "function",
+        "z": "127d062e39f4e574",
+        "name": "function 2",
+        "func": "let list = global.get(\"character\" || []);\n\nconst character = list.find(u => u.name === msg.payload.content);\n\nlet items = character.items;\n\nitems.forEach(f => console.log(f)); \nmsg.payload = {\n    content: `Here you go ${items}!`\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 100,
+        "wires": [
+            [
+                "037d707fe51eaf2f"
+            ]
+        ]
+    },
+    {
+        "id": "cbdae701b13f57a7",
+        "type": "function",
+        "z": "127d062e39f4e574",
+        "name": "/addInventory",
+        "func": "if (msg.payload.indexOf(\"/addInventory\") == 0) {\n    let parts = msg.payload.split(\" \"); \n    msg.payload = {\n        player: parts[1],\n        item: parts [2],\n    }\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 220,
+        "wires": [
+            [
+                "2f23fb0cbb7ad674",
+                "e1504046af6b946f"
+            ]
+        ]
+    },
+    {
+        "id": "27a3c568b356a211",
+        "type": "discordMessage",
+        "z": "127d062e39f4e574",
+        "name": "",
+        "channelIdFilter": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 120,
+        "y": 220,
+        "wires": [
+            [
+                "cbdae701b13f57a7"
+            ]
+        ]
+    },
+    {
+        "id": "e1504046af6b946f",
+        "type": "function",
+        "z": "127d062e39f4e574",
+        "name": "function 5",
+        "func": "\nlet list = global.get(\"character\" || []);\n\nconst character = list.find(u => u.name === msg.payload.name);\nconst index = list.findIndex(u => u.name === msg.payload.name);\n\nlet items = character.items;\n\nitems.push(msg.payload.item);\n\ncharacter.set(\"items\", items);\n\nlist[index] = character;\n\nglobal.set(\"character\", list);\n\nmsg.payload = {\n    content: `${msg.payload.item} added!`\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 220,
+        "wires": [
+            [
+                "158b38a737119b3f",
+                "1a050cb8f74860d8"
+            ]
+        ]
+    },
+    {
+        "id": "158b38a737119b3f",
+        "type": "discordMessageManager",
+        "z": "127d062e39f4e574",
+        "name": "",
+        "channel": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 930,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2f23fb0cbb7ad674",
+        "type": "debug",
+        "z": "127d062e39f4e574",
+        "name": "point 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "1a050cb8f74860d8",
+        "type": "debug",
+        "z": "127d062e39f4e574",
+        "name": "point 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "87f46dcc809c4cea",
+        "type": "debug",
+        "z": "127d062e39f4e574",
+        "name": "point 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 630,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "037d707fe51eaf2f",
+        "type": "discordMessageManager",
+        "z": "127d062e39f4e574",
+        "name": "",
+        "channel": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 690,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c67c0219b70f63b2",
+        "type": "switch",
+        "z": "837289715e1acf89",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "roll d4",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "roll d6",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "roll d8",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "roll d10",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "roll d12",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "roll d20",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 6,
+        "x": 590,
+        "y": 140,
+        "wires": [
+            [
+                "f119355cec4a041f"
+            ],
+            [
+                "8efc511dcc146f92"
+            ],
+            [
+                "816cbbd6d632caa3"
+            ],
+            [
+                "c132fdfe970fa488"
+            ],
+            [
+                "6cba71e56ba0e62d"
+            ],
+            [
+                "839522196a66e249"
+            ]
+        ]
+    },
+    {
+        "id": "f119355cec4a041f",
+        "type": "random",
+        "z": "837289715e1acf89",
+        "name": "1-4",
+        "low": 1,
+        "high": "4",
+        "inte": "true",
+        "property": "payload",
+        "x": 790,
+        "y": 40,
+        "wires": [
+            [
+                "5253c97b5fecc2a7"
+            ]
+        ]
+    },
+    {
+        "id": "5253c97b5fecc2a7",
+        "type": "template",
+        "z": "837289715e1acf89",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "You rolled {{payload}}!",
+        "output": "str",
+        "x": 980,
+        "y": 140,
+        "wires": [
+            [
+                "838d9ad82cbbfa03"
+            ]
+        ]
+    },
+    {
+        "id": "8efc511dcc146f92",
+        "type": "random",
+        "z": "837289715e1acf89",
+        "name": "1-6",
+        "low": 1,
+        "high": "6",
+        "inte": "true",
+        "property": "payload",
+        "x": 790,
+        "y": 80,
+        "wires": [
+            [
+                "5253c97b5fecc2a7"
+            ]
+        ]
+    },
+    {
+        "id": "816cbbd6d632caa3",
+        "type": "random",
+        "z": "837289715e1acf89",
+        "name": "1-8",
+        "low": 1,
+        "high": "8",
+        "inte": "true",
+        "property": "payload",
+        "x": 790,
+        "y": 120,
+        "wires": [
+            [
+                "5253c97b5fecc2a7"
+            ]
+        ]
+    },
+    {
+        "id": "c132fdfe970fa488",
+        "type": "random",
+        "z": "837289715e1acf89",
+        "name": "1-10",
+        "low": 1,
+        "high": "10",
+        "inte": "true",
+        "property": "payload",
+        "x": 790,
+        "y": 160,
+        "wires": [
+            [
+                "5253c97b5fecc2a7"
+            ]
+        ]
+    },
+    {
+        "id": "6cba71e56ba0e62d",
+        "type": "random",
+        "z": "837289715e1acf89",
+        "name": "1-12",
+        "low": 1,
+        "high": "12",
+        "inte": "true",
+        "property": "payload",
+        "x": 790,
+        "y": 200,
+        "wires": [
+            [
+                "5253c97b5fecc2a7"
+            ]
+        ]
+    },
+    {
+        "id": "839522196a66e249",
+        "type": "random",
+        "z": "837289715e1acf89",
+        "name": "1-20",
+        "low": 1,
+        "high": "20",
+        "inte": "true",
+        "property": "payload",
+        "x": 790,
+        "y": 240,
+        "wires": [
+            [
+                "5253c97b5fecc2a7"
+            ]
+        ]
+    },
+    {
+        "id": "6414ea5456d760e7",
+        "type": "discordMessage",
+        "z": "837289715e1acf89",
+        "name": "",
+        "channelIdFilter": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 360,
+        "y": 120,
+        "wires": [
+            [
+                "c67c0219b70f63b2"
+            ]
+        ]
+    },
+    {
+        "id": "838d9ad82cbbfa03",
+        "type": "discordMessageManager",
+        "z": "837289715e1acf89",
+        "name": "",
+        "channel": "1488497134625099787",
+        "token": "efe6662e8ca0273c",
+        "x": 1190,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a4502cdef7517f01",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@tomsith/node-red-contrib-minecraft": "0.7.7",
+            "node-red-contrib-discord-advanced": "3.6.0",
+            "node-red-node-random": "0.4.1"
+        }
+    }
+]
